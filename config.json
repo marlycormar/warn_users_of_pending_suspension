@@ -1,0 +1,19 @@
+{
+    "name": "Warn Users of Pending Suspension",
+    "namespace": "SuspensionWarning\\ExternalModule",
+    "description": "",
+    "permissions": [
+        ""
+    ],
+    "authors": [
+        {
+            "name": "Marly Cormar",
+            "email": "marlycormar@ufl.edu",
+            "institution": "University of Florida - CTSI"
+        }
+    ],
+    "compatibility": {
+        "redcap-version-min": "8.0.3",
+        "redcap-version-max": ""
+   }
+}
