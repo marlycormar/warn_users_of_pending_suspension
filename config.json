@@ -12,6 +12,29 @@
             "institution": "University of Florida - CTSI"
         }
     ],
+    "system-settings" : [
+        {
+            "key": "wups_cc",
+            "name": "CC address",
+            "required": false,
+            "type": "text",
+            "repeatable": true
+        },
+        {
+            "key": "wups_subject",
+            "name": "Subject",
+            "required": false,
+            "type": "text",
+            "repeatable": false
+        },
+        {
+            "key": "wups_body",
+            "name": "Body",
+            "required": false,
+            "type": "textarea",
+            "repeatable": false
+        }
+    ],
     "compatibility": {
         "redcap-version-min": "8.0.3",
         "redcap-version-max": ""
