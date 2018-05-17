@@ -8,6 +8,7 @@ namespace SuspensionWarning\ExternalModule;
 
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
+use REDCap;
 
 /**
  * ExternalModule class for SuspensionWarning.
@@ -60,11 +61,12 @@ class ExternalModule extends AbstractExternalModule {
 
 			$most_recent_access_date = max($row['user_lastlogin'], $row['user_lastactivity']);
 			# now - most_recent_access_date 
-			$days_left = 
+			$days_passed = date("Y-m-d h:i:s") - $most_recent_access_date;
+			print("It has passed " .$days_passed. " days.");
 
 			#print("Most recent access date = " .$most_recent_access_date. ".");
 			// Email the user to warn them every 5 days and 2 days before the account will be suspended
-			if ($row['user_email'] != '' && ($most_recent_access_date % 5 == 0 || $most_recent_access_date < 2))
+			if ($row['user_email'] != '' && ($days_passed % 5 == 0 || $days_passed < 2))
 			{
 				print("Inside while and if.");
 
@@ -105,7 +107,12 @@ class ExternalModule extends AbstractExternalModule {
 				// Send the email
 				#$email->setTo($row['user_email']);
 
-				sendEmail($project_contact_email);
+				if(!self::sendEmail($project_contact_email))
+				{
+					print("This message was not succesfull.");
+				}
+				else
+					print("This message was succesfull.");
 			}
 		}
 		
@@ -116,17 +123,14 @@ class ExternalModule extends AbstractExternalModule {
 	}
 
 	function sendEmail($project_contact_email) {
+		$to = 'marlycormar@ufl.edu';
 		$cc = $this->getSystemSetting("wups_cc");
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
 		$sender = $project_contact_email;
 
-		$email = new Message;
-		$email->setTo('marlycormar@ufl.edu');
-		$email->setFrom($sender);
-		$email->setCc($cc);
-		$email->setSubject($subject);
-		$email->setBody($body);
-		return $email->send();
+		$success = REDCap::email($to, $sender, $subject, $body);
+
+		return $success;
 	}
 }
