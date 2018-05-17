@@ -14,6 +14,15 @@ use ExternalModules\ExternalModules;
  */
 class ExternalModule extends AbstractExternalModule {
 
+	/*
+    * @inheritdoc
+    */
+    function redcap_every_page_top($project_id) {
+    	print(date('H:i:s'));
+    	self::warn_users_account_suspension_cron();
+    }
+
+
 	/* handle users that have expiration dates: which of the two have priority*/
 	public function warn_users_account_suspension_cron()
 	{
@@ -25,10 +34,6 @@ class ExternalModule extends AbstractExternalModule {
 
 		$number_of_days_before_notifications_start = min(30, $suspend_users_inactive_days);
 
-		// Static number of days before expiration occurs to warn them (first warning, then second warning)
-
-		$warning_days = array(User::USER_EXPIRE_FIRST_WARNING_DAYS, User::USER_EXPIRE_SECOND_WARNING_DAYS); // e.g. 14 days, then 2 days
-
 		// Initialize count
 		$numUsersEmailed = 0;
 		$today = date("Y-m-d");
@@ -37,9 +42,9 @@ class ExternalModule extends AbstractExternalModule {
 		$email = new Message();
 		$email->setFrom($project_contact_email);
 		// Query users that wille expire *exactly* x days from today (since this will only run once per day)
-		$sql = "select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin
-				from redcap_user_information where user_suspended_time is null and ((user_lastactivity is not null and DATEDIFF(day, GETDATE(), user_lastactivity) <= '$number_of_days_before_notifications_start') or (user_lastlogin is not null and DATEDIFF(day, GETDATE(), user_lastlogin) <= '$number_of_days_before_notifications_start'))";
-		$q = db_query($sql);
+		$sql = "select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin 
+				from redcap_user_information where user_suspended_time is null and ((user_lastactivity is not null and DATEDIFF(NOW(), user_lastactivity) <= '$number_of_days_before_notifications_start') or (user_lastlogin is not null and DATEDIFF(NOW(), user_lastlogin) <= '$number_of_days_before_notifications_start'));";
+				$q = ExternalModules::query($sql);
 		$numUsersEmailed += db_num_rows($q);
 		while ($row = db_fetch_assoc($q))
 		{
@@ -81,7 +86,8 @@ class ExternalModule extends AbstractExternalModule {
 
 				}
 				// Send the email
-				$email->setTo($row['user_email']);
+				#$email->setTo($row['user_email']);
+				$email->setTo('marlycormar@ufl.edu');
 				$email->setSubject("[REDCap] {$row['username']}{$lang['cron_16']} $days_before_expiration {$lang['scheduling_25']}");
 				$email->setBody($emailContents, true);
 				$email->send();
