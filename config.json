@@ -3,7 +3,7 @@
     "namespace": "SuspensionWarning\\ExternalModule",
     "description": "A REDCap external module that will warn users of pending suspensions and provide an easy opportunity to extend the life of REDCap accounts.",
     "permissions": [
-        ""
+        "redcap_every_page_top"
     ],
     "authors": [
         {
@@ -33,6 +33,15 @@
             "required": false,
             "type": "textarea",
             "repeatable": false
+        }
+    ],
+    "crons": [
+        {
+            "cron_name": "WarnUsersAccountSuspension_Cron",
+            "cron_description": "Cron that runs daily to warn users of account suspensions.",
+            "method": "WarnUsersAccountSuspension_Cron",
+            "cron_frequency": "300",
+            "cron_max_run_time": "1200"
         }
     ],
     "compatibility": {
