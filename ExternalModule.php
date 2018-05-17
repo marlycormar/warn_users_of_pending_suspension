@@ -18,7 +18,6 @@ class ExternalModule extends AbstractExternalModule {
     * @inheritdoc
     */
     function redcap_every_page_top($project_id) {
-    	print(date('H:i:s'));
     	self::warn_users_account_suspension_cron();
     }
 
@@ -32,7 +31,10 @@ class ExternalModule extends AbstractExternalModule {
 		// If feature is not enabled, then return
 		if ($suspend_users_inactive_type == '' || !is_numeric($suspend_users_inactive_days) || $suspend_users_inactive_days < 1) return;
 
+		# find a way of setting this that is more accurate, i.e., such that it is always less than suspend_users_inactive_days
 		$number_of_days_before_notifications_start = min(30, $suspend_users_inactive_days);
+
+		print("The number of days before notifications start " .$number_of_days_before_notifications_start. ".");
 
 		// Initialize count
 		$numUsersEmailed = 0;
@@ -41,16 +43,31 @@ class ExternalModule extends AbstractExternalModule {
 		// Instantiate email object
 		// Query users that wille expire *exactly* x days from today (since this will only run once per day)
 		$sql = "select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin 
-				from redcap_user_information where user_suspended_time is null and ((user_lastactivity is not null and DATEDIFF(NOW(), user_lastactivity) <= '$number_of_days_before_notifications_start') or (user_lastlogin is not null and DATEDIFF(NOW(), user_lastlogin) <= '$number_of_days_before_notifications_start'));";
-				$q = ExternalModules::query($sql);
+				from redcap_user_information where user_suspended_time is null 
+				and (user_lastactivity is not null and DATEDIFF(NOW(), user_lastactivity) >= '$number_of_days_before_notifications_start') 
+				and (user_lastlogin is not null and DATEDIFF(NOW(), user_lastlogin) >= '$number_of_days_before_notifications_start');";
+		
+		$q = ExternalModules::query($sql);
 		$numUsersEmailed += db_num_rows($q);
+
+		print("Before while.");
+
+		print("There are " .count($q). " records.");
+
 		while ($row = db_fetch_assoc($q))
 		{
-			$most_recent_access_date = max($row['user_lastlogin'], $row['user_lastactivity']);
+			#print("The username is ".$row['username']. ".");
 
+			$most_recent_access_date = max($row['user_lastlogin'], $row['user_lastactivity']);
+			# now - most_recent_access_date 
+			$days_left = 
+
+			#print("Most recent access date = " .$most_recent_access_date. ".");
 			// Email the user to warn them every 5 days and 2 days before the account will be suspended
 			if ($row['user_email'] != '' && ($most_recent_access_date % 5 == 0 || $most_recent_access_date < 2))
 			{
+				print("Inside while and if.");
+
 				// Set date and time x days from now
 				$mktime = strtotime($row['user_expiration']);
 				$x_days_from_now_friendly = date("l, F j, Y", $mktime);
