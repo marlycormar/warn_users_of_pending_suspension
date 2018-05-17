@@ -39,8 +39,6 @@ class ExternalModule extends AbstractExternalModule {
 		$today = date("Y-m-d");
 		$x_days_from_now = date("Y-m-d", mktime(date("H"),date("i"),date("s"),date("m"),date("d")+$days_before_expiration,date("Y")));
 		// Instantiate email object
-		$email = new Message();
-		$email->setFrom($project_contact_email);
 		// Query users that wille expire *exactly* x days from today (since this will only run once per day)
 		$sql = "select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin 
 				from redcap_user_information where user_suspended_time is null and ((user_lastactivity is not null and DATEDIFF(NOW(), user_lastactivity) <= '$number_of_days_before_notifications_start') or (user_lastlogin is not null and DATEDIFF(NOW(), user_lastlogin) <= '$number_of_days_before_notifications_start'));";
@@ -69,28 +67,28 @@ class ExternalModule extends AbstractExternalModule {
 				// Send email to user and/or user+sponsor
 				if (!$hasSponsor) {
 					// EMAIL USER ONLY
-					$email->setCc("");
-					$emailContents =   "{$lang['cron_02']}<br><br>{$lang['cron_03']} \"<b>{$row['username']}</b>\"
+					#$email->setCc("");
+					/*$emailContents =   "{$lang['cron_02']}<br><br>{$lang['cron_03']} \"<b>{$row['username']}</b>\"
 										(<b>{$row['user_firstname']} {$row['user_lastname']}</b>) {$lang['cron_06']}
 										<b>$x_days_from_now_friendly ($x_time_from_now_friendly)</b>{$lang['period']}
 										{$lang['cron_23']} {$lang['cron_24']} <a href=\"".APP_PATH_WEBROOT_FULL."\">".APP_PATH_WEBROOT_FULL."</a> {$lang['cron_05']}";
+										*/
 				} else {
 					// EMAIL USER AND CC SPONSOR
-					$email->setCc($sponsorUserInfo['user_email']);
-					$emailContents =   "{$lang['cron_02']}<br><br>{$lang['cron_13']} \"<b>{$row['username']}</b>\"
+					#$email->setCc($sponsorUserInfo['user_email']);
+					/*$emailContents =   "{$lang['cron_02']}<br><br>{$lang['cron_13']} \"<b>{$row['username']}</b>\"
 										(<b>{$row['user_firstname']} {$row['user_lastname']}</b>) {$lang['cron_06']}
 										<b>$x_days_from_now_friendly ($x_time_from_now_friendly)</b>{$lang['period']}
 										{$lang['cron_23']} {$lang['cron_14']} \"<b>{$sponsorUserInfo['username']}</b>\"
 										(<b>{$sponsorUserInfo['user_firstname']} {$sponsorUserInfo['user_lastname']}</b>){$lang['cron_15']}
 										<a href=\"".APP_PATH_WEBROOT_FULL."\">".APP_PATH_WEBROOT_FULL."</a> {$lang['cron_05']}";
+									*/
 
 				}
 				// Send the email
 				#$email->setTo($row['user_email']);
-				$email->setTo('marlycormar@ufl.edu');
-				$email->setSubject("[REDCap] {$row['username']}{$lang['cron_16']} $days_before_expiration {$lang['scheduling_25']}");
-				$email->setBody($emailContents, true);
-				$email->send();
+
+				sendEmail($project_contact_email);
 			}
 		}
 		
@@ -98,5 +96,20 @@ class ExternalModule extends AbstractExternalModule {
 		if ($numUsersEmailed > 0) {
 			$GLOBALS['redcapCronJobReturnMsg'] = "$numUsersEmailed users were emailed to warn them of their upcoming account expiration";
 		}
+	}
+
+	function sendEmail($project_contact_email) {
+		$cc = $this->getSystemSetting("wups_cc");
+		$subject = $this->getSystemSetting("wups_subject");
+		$body = $this->getSystemSetting("wups_body");
+		$sender = $project_contact_email;
+
+		$email = new Message;
+		$email->setTo('marlycormar@ufl.edu');
+		$email->setFrom($sender);
+		$email->setCc($cc);
+		$email->setSubject($subject);
+		$email->setBody($body);
+		return $email->send();
 	}
 }
