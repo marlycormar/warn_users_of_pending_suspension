@@ -22,7 +22,6 @@ class ExternalModule extends AbstractExternalModule {
     	self::warn_users_account_suspension_cron();
     }
 
-
 	/* handle users that have expiration dates: which of the two have priority*/
 	public function warn_users_account_suspension_cron()
 	{
@@ -51,24 +50,25 @@ class ExternalModule extends AbstractExternalModule {
 		$q = ExternalModules::query($sql);
 		$numUsersEmailed += db_num_rows($q);
 
-		print("Before while.");
-
-		print("There are " .count($q). " records.");
 
 		while ($row = db_fetch_assoc($q))
 		{
-			#print("The username is ".$row['username']. ".");
 
 			$most_recent_access_date = max($row['user_lastlogin'], $row['user_lastactivity']);
-			# now - most_recent_access_date 
 			$days_passed = date("Y-m-d h:i:s") - $most_recent_access_date;
-			print("It has passed " .$days_passed. " days.");
 
-			#print("Most recent access date = " .$most_recent_access_date. ".");
 			// Email the user to warn them every 5 days and 2 days before the account will be suspended
 			if ($row['user_email'] != '' && ($days_passed % 5 == 0 || $days_passed < 2))
 			{
-				print("Inside while and if.");
+
+				$user_info = [
+					'username' => $row['username'],
+					'user_firstname' => $row['user_firstname'],
+					'user_lastname' => $row['user_lastname'],
+					'redcap_base_url' => $row['username'],
+					'days_until_suspension' => $row['username'],
+					'suspension_date' => $row['username']
+				];
 
 				// Set date and time x days from now
 				$mktime = strtotime($row['user_expiration']);
@@ -85,35 +85,19 @@ class ExternalModule extends AbstractExternalModule {
 				}
 				// Send email to user and/or user+sponsor
 				if (!$hasSponsor) {
-					// EMAIL USER ONLY
-					#$email->setCc("");
-					/*$emailContents =   "{$lang['cron_02']}<br><br>{$lang['cron_03']} \"<b>{$row['username']}</b>\"
-										(<b>{$row['user_firstname']} {$row['user_lastname']}</b>) {$lang['cron_06']}
-										<b>$x_days_from_now_friendly ($x_time_from_now_friendly)</b>{$lang['period']}
-										{$lang['cron_23']} {$lang['cron_24']} <a href=\"".APP_PATH_WEBROOT_FULL."\">".APP_PATH_WEBROOT_FULL."</a> {$lang['cron_05']}";
-										*/
 				} else {
-					// EMAIL USER AND CC SPONSOR
-					#$email->setCc($sponsorUserInfo['user_email']);
-					/*$emailContents =   "{$lang['cron_02']}<br><br>{$lang['cron_13']} \"<b>{$row['username']}</b>\"
-										(<b>{$row['user_firstname']} {$row['user_lastname']}</b>) {$lang['cron_06']}
-										<b>$x_days_from_now_friendly ($x_time_from_now_friendly)</b>{$lang['period']}
-										{$lang['cron_23']} {$lang['cron_14']} \"<b>{$sponsorUserInfo['username']}</b>\"
-										(<b>{$sponsorUserInfo['user_firstname']} {$sponsorUserInfo['user_lastname']}</b>){$lang['cron_15']}
-										<a href=\"".APP_PATH_WEBROOT_FULL."\">".APP_PATH_WEBROOT_FULL."</a> {$lang['cron_05']}";
-									*/
-
 				}
 				// Send the email
 				#$email->setTo($row['user_email']);
 
-				if(!self::sendEmail($project_contact_email))
+				if(!self::sendEmail($project_contact_email, $user_info))
 				{
 					print("This message was not succesfull.");
 				}
 				else
 					print("This message was succesfull.");
 			}
+			break;
 		}
 		
 		// Set cron job message
@@ -122,14 +106,27 @@ class ExternalModule extends AbstractExternalModule {
 		}
 	}
 
-	function sendEmail($project_contact_email) {
+	function sendEmail($project_contact_email, $user_info) {
 		$to = 'marlycormar@ufl.edu';
 		$cc = $this->getSystemSetting("wups_cc");
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
-		$sender = $project_contact_email;
 
-		$success = REDCap::email($to, $sender, $subject, $body);
+		$piping_pairs = [
+			'[username]' => $user_info['username'], 
+			'[user_firstname]' => $user_info['user_firstname'], 
+			'[user_lastname]' => $user_info['user_lastname'], 
+			'[redcap_base_url]' => $user_info['redcap_base_url'], 
+			'[days_until_suspension]' => $user_info['days_until_suspension'], 
+			'[suspension_date]' => $user_info['suspension_date']
+		];
+
+		foreach (array_keys($piping_pairs) as $key){
+			$body = str_replace($key, $piping_pairs[$key], $body);
+		}
+
+		$sender = $project_contact_email;
+		$success = REDCap::email($to, $sender, $subject, $body . 'something3');
 
 		return $success;
 	}
