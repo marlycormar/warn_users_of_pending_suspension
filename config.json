@@ -37,11 +37,11 @@
     ],
     "crons": [
         {
-            "cron_name": "WarnUsersAccountSuspension_Cron",
+            "cron_name": "warn_users_account_suspension_cron",
             "cron_description": "Cron that runs daily to warn users of account suspensions.",
-            "method": "WarnUsersAccountSuspension_Cron",
+            "method": "warn_users_account_suspension_cron",
             "cron_frequency": "300",
-            "cron_max_run_time": "1200"
+            "cron_max_run_time": "60"
         }
     ],
     "compatibility": {
