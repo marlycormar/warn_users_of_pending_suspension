@@ -33,6 +33,14 @@
             "required": false,
             "type": "textarea",
             "repeatable": false
+        },
+        {
+            "key": "wups_notifications",
+            "name": "Days Before Suspension",
+            "description": "These are the days before suspension when notifications will be sent.",
+            "required": false,
+            "type": "textarea",
+            "repeatable": false
         }
     ],
     "crons": [
@@ -40,8 +48,8 @@
             "cron_name": "warn_users_account_suspension_cron",
             "cron_description": "Cron that runs daily to warn users of account suspensions.",
             "method": "warn_users_account_suspension_cron",
-            "cron_frequency": "300",
-            "cron_max_run_time": "60"
+            "cron_frequency": "3000",
+            "cron_max_run_time": "600"
         }
     ],
     "compatibility": {
