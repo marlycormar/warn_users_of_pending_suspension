@@ -28,9 +28,9 @@ class ExternalModule extends AbstractExternalModule {
     	self::warn_users_account_suspension_cron();
     }
 
-	public function warn_users_account_suspension_cron()
+	function warn_users_account_suspension_cron()
 	{
-		global $project_contact_email, $lang, $auth_meth_global, $suspend_users_inactive_type, $suspend_users_inactive_days,
+		global $suspend_users_inactive_type, $suspend_users_inactive_days,
 			   $suspend_users_inactive_send_email;
 
 		// If feature is not enabled, then return
@@ -64,7 +64,7 @@ class ExternalModule extends AbstractExternalModule {
 						'to' => $row['user_email']
 					];
 
-					if(!self::sendEmail($project_contact_email, $user_info))
+					if(!self::sendEmail($user_info))
 						print("Unable to send email to ". $row['user_firstname'].".");
 					else
 						print("The message to " .$row['user_firstname']. " was succesfull.");
@@ -73,7 +73,7 @@ class ExternalModule extends AbstractExternalModule {
 		}
 	}
 
-	function sendEmail($project_contact_email, $user_info) {
+	function sendEmail($user_info) {
 		$to = $user_info['to'];
 		$cc = $this->getSystemSetting("wups_cc");
 		$subject = $this->getSystemSetting("wups_subject");
