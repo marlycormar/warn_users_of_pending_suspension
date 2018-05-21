@@ -12,6 +12,9 @@ TODO:
 
 namespace SuspensionWarning\ExternalModule;
 
+
+use Project;
+
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 use REDCap;
@@ -78,7 +81,7 @@ class ExternalModule extends AbstractExternalModule {
 		$cc = $this->getSystemSetting("wups_cc");
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
-		$activation_link = dirname(__FILE__)."/activate_account.php?username=".$user_info['username'];
+		$activation_link = APP_PATH_WEBROOT_FULL . "modules/" . basename(dirname(__FILE__)) . "/activate_account.php?username=" . $user_info['username'];
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'], 
