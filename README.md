@@ -20,7 +20,8 @@ A REDCap external module that will warn users of pending suspensions and provide
     
         Dear [user_firstname] [user_lastname], <br><br>
 
-        Your account will be suspended in [days_until_suspension] days on [suspension_date]. If you want to avoid account suspension, please go to 
+        Your account will be suspended in [days_until_suspension] days on [suspension_date]. 
+        If you want to avoid account suspension, please go to 
         <a href="[activation_link]">REDCap account extension</a>. <br><br>
 
         Regards,<br>
