@@ -30,23 +30,27 @@ class ExternalModule extends AbstractExternalModule {
 		// If feature is not enabled, then return
 		if ($suspend_users_inactive_type == '' || !is_numeric($suspend_users_inactive_days) || $suspend_users_inactive_days < 1) return;
 
-		$days = $this->getSystemSetting('wups_notifications') ?? [1];
+		$days = $this->getSystemSetting('wups_notifications') ?? '1';
+		$days = array_map("intval", explode(",", $days));
 
 		// Initialize count
 		$numUsersEmailed = 0;
 
 		foreach($days as $day){
 			$sql = "select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin 
-					from redcap_user_information where user_suspended_time is null 
-					and ((user_lastactivity is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastactivity) = '$day') 
+					from redcap_user_information where user_suspended_time is null and
+					((user_lastactivity is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastactivity) = '$day') 
 					or (user_lastlogin is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastlogin) = '$day'));";
 			
 			$q = ExternalModules::query($sql);
 			$numUsersEmailed += db_num_rows($q);
 
+			print("Is the list empty? " . empty($q) );
+
+			
+
 			while ($row = db_fetch_assoc($q))
 			{
-				// Email the user to warn them every 5 days and 2 days before the account will be suspended
 				if ($row['user_email'] != '')
 				{
 					$user_info = [
@@ -55,14 +59,12 @@ class ExternalModule extends AbstractExternalModule {
 						'user_lastname' => $row['user_lastname'],
 						'redcap_base_url' => APP_PATH_WEBROOT_FULL,
 						'days_until_suspension' => $day,
-						'suspension_date' => date("Y-m-d h:i:s") + $day,
+						'suspension_date' => date('Y-m-d', strtotime(date("Y-m-d"). ' + '. $day .' days')),
 						'to' => $row['user_email']
 					];
 
 					if(!self::sendEmail($project_contact_email, $user_info))
-					{
 						print("This message was not succesfull.");
-					}
 					else
 						print("This message was succesfull.");
 				}
@@ -90,7 +92,7 @@ class ExternalModule extends AbstractExternalModule {
 		}
 
 		$sender = $project_contact_email;
-		$success = REDCap::email($to, $sender, $subject, $body . 'something');
+		$success = REDCap::email($to, $sender, $subject, $body);
 
 		return $success;
 	}
