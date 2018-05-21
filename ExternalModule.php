@@ -12,9 +12,6 @@ TODO:
 
 namespace SuspensionWarning\ExternalModule;
 
-
-use Project;
-
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 use REDCap;
@@ -42,9 +39,6 @@ class ExternalModule extends AbstractExternalModule {
 		$days = $this->getSystemSetting('wups_notifications') ?? '1';
 		$days = array_map("intval", explode(",", $days));
 
-		// Initialize count
-		$numUsersEmailed = 0;
-
 		foreach($days as $day){
 			$sql = "select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin 
 					from redcap_user_information where user_suspended_time is null and
@@ -52,7 +46,6 @@ class ExternalModule extends AbstractExternalModule {
 					or (user_lastlogin is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastlogin) = '$day'));";
 			
 			$q = ExternalModules::query($sql);
-			$numUsersEmailed += db_num_rows($q);
 
 			while ($row = db_fetch_assoc($q))
 			{
@@ -78,7 +71,7 @@ class ExternalModule extends AbstractExternalModule {
 
 	function sendEmail($user_info) {
 		$to = $user_info['to'];
-		$cc = $this->getSystemSetting("wups_cc");
+		$sender = 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
 		$activation_link = APP_PATH_WEBROOT_FULL . "modules/" . basename(dirname(__FILE__)) . "/activate_account.php?username=" . $user_info['username'];
@@ -96,7 +89,6 @@ class ExternalModule extends AbstractExternalModule {
 			$body = str_replace($key, $piping_pairs[$key], $body);
 		}
 
-		$sender = 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$success = REDCap::email($to, $sender, $subject, $body);
 
 		return $success;
