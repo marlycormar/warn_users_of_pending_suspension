@@ -4,6 +4,12 @@
  * Provides ExternalModule class for SuspensionWarning.
  */
 
+/*
+TODO:
+- log cron messages for both succ. and unsucc. 
+
+*/
+
 namespace SuspensionWarning\ExternalModule;
 
 use ExternalModules\AbstractExternalModule;
@@ -45,10 +51,6 @@ class ExternalModule extends AbstractExternalModule {
 			$q = ExternalModules::query($sql);
 			$numUsersEmailed += db_num_rows($q);
 
-			print("Is the list empty? " . empty($q) );
-
-			
-
 			while ($row = db_fetch_assoc($q))
 			{
 				if ($row['user_email'] != '')
@@ -57,16 +59,15 @@ class ExternalModule extends AbstractExternalModule {
 						'username' => $row['username'],
 						'user_firstname' => $row['user_firstname'],
 						'user_lastname' => $row['user_lastname'],
-						'redcap_base_url' => APP_PATH_WEBROOT_FULL,
 						'days_until_suspension' => $day,
 						'suspension_date' => date('Y-m-d', strtotime(date("Y-m-d"). ' + '. $day .' days')),
 						'to' => $row['user_email']
 					];
 
 					if(!self::sendEmail($project_contact_email, $user_info))
-						print("This message was not succesfull.");
+						print("Unable to send email to ". $row['user_firstname'].".");
 					else
-						print("This message was succesfull.");
+						print("The message to " .$row['user_firstname']. " was succesfull.");
 				}
 			}
 		}
@@ -77,12 +78,13 @@ class ExternalModule extends AbstractExternalModule {
 		$cc = $this->getSystemSetting("wups_cc");
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
+		$activation_link = dirname(__FILE__)."/activate_account.php?username=".$user_info['username'];
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'], 
 			'[user_firstname]' => $user_info['user_firstname'], 
 			'[user_lastname]' => $user_info['user_lastname'], 
-			'[redcap_base_url]' => $user_info['redcap_base_url'], 
+			'[activation_link]' => $activation_link, 
 			'[days_until_suspension]' => $user_info['days_until_suspension'], 
 			'[suspension_date]' => $user_info['suspension_date']
 		];
@@ -91,7 +93,7 @@ class ExternalModule extends AbstractExternalModule {
 			$body = str_replace($key, $piping_pairs[$key], $body);
 		}
 
-		$sender = $project_contact_email;
+		$sender = 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$success = REDCap::email($to, $sender, $subject, $body);
 
 		return $success;
