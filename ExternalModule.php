@@ -38,35 +38,26 @@ class ExternalModule extends AbstractExternalModule {
 		foreach($days as $day){
 			$sql = "select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin 
 					from redcap_user_information where user_suspended_time is null 
-					and (user_lastactivity is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastactivity) = '$day') 
-					and (user_lastlogin is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastlogin) = '$day');";
+					and ((user_lastactivity is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastactivity) = '$day') 
+					or (user_lastlogin is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastlogin) = '$day'));";
 			
 			$q = ExternalModules::query($sql);
 			$numUsersEmailed += db_num_rows($q);
 
 			while ($row = db_fetch_assoc($q))
 			{
-				$most_recent_access_date = max($row['user_lastlogin'], $row['user_lastactivity']);
-				$days_passed = date("Y-m-d h:i:s") - $most_recent_access_date;
-
 				// Email the user to warn them every 5 days and 2 days before the account will be suspended
-				if ($row['user_email'] != '' && ($days_passed % 5 == 0 || $days_passed < 2))
+				if ($row['user_email'] != '')
 				{
 					$user_info = [
 						'username' => $row['username'],
 						'user_firstname' => $row['user_firstname'],
 						'user_lastname' => $row['user_lastname'],
-						'redcap_base_url' => $row['username'],
-						'days_until_suspension' => $row['username'],
-						'suspension_date' => $row['username']
+						'redcap_base_url' => APP_PATH_WEBROOT_FULL,
+						'days_until_suspension' => $day,
+						'suspension_date' => date("Y-m-d h:i:s") + $day,
+						'to' => $row['user_email']
 					];
-
-					// Send email to user and/or user+sponsor
-					if (!$hasSponsor) {
-					} else {
-					}
-					// Send the email
-					#$email->setTo($row['user_email']);
 
 					if(!self::sendEmail($project_contact_email, $user_info))
 					{
@@ -75,18 +66,12 @@ class ExternalModule extends AbstractExternalModule {
 					else
 						print("This message was succesfull.");
 				}
-				break;
 			}
-		}
-
-		// Set cron job message
-		if ($numUsersEmailed > 0) {
-			$GLOBALS['redcapCronJobReturnMsg'] = "$numUsersEmailed users were emailed to warn them of their upcoming account expiration";
 		}
 	}
 
 	function sendEmail($project_contact_email, $user_info) {
-		$to = 'marlycormar@ufl.edu';
+		$to = $user_info['to'];
 		$cc = $this->getSystemSetting("wups_cc");
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
@@ -105,7 +90,7 @@ class ExternalModule extends AbstractExternalModule {
 		}
 
 		$sender = $project_contact_email;
-		$success = REDCap::email($to, $sender, $subject, $body . 'something3');
+		$success = REDCap::email($to, $sender, $subject, $body . 'something');
 
 		return $success;
 	}
