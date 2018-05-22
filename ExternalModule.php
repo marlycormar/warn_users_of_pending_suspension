@@ -6,7 +6,7 @@
 
 /*
 TODO:
-- log cron messages for both succ. and unsucc. 
+- log cron messages for both succ. and unsucc.
 
 */
 
@@ -25,7 +25,7 @@ class ExternalModule extends AbstractExternalModule {
     * @inheritdoc
     */
     function redcap_every_page_top($project_id) {
-    	self::warn_users_account_suspension_cron();
+    	//self::warn_users_account_suspension_cron();
     }
 
 	function warn_users_account_suspension_cron()
@@ -40,11 +40,19 @@ class ExternalModule extends AbstractExternalModule {
 		$days = array_map("intval", explode(",", $days));
 
 		foreach($days as $day){
-			$sql = "select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin 
-					from redcap_user_information where user_suspended_time is null and
-					((user_lastactivity is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastactivity) = '$day') 
-					or (user_lastlogin is not null and '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_lastlogin) = '$day'));";
-			
+			$sql = "select * from (
+					select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin,
+					(case
+					when user_lastactivity is not null and user_lastlogin is not null then greatest(user_lastlogin, user_lastactivity)
+					when user_lastactivity is not null then user_lastactivity
+					when user_lastlogin is not null then user_lastlogin
+					when user_creation is not null then user_creation
+					end) as user_last_date
+					from redcap_user_information
+					where user_suspended_time is null
+					) as my_user_info
+					where '$suspend_users_inactive_days' - DATEDIFF(NOW(), user_last_date) = '$day';";
+
 			$q = ExternalModules::query($sql);
 
 			while ($row = db_fetch_assoc($q))
@@ -77,11 +85,11 @@ class ExternalModule extends AbstractExternalModule {
 		$activation_link = APP_PATH_WEBROOT_FULL . "modules/" . basename(dirname(__FILE__)) . "/activate_account.php?username=" . $user_info['username'];
 
 		$piping_pairs = [
-			'[username]' => $user_info['username'], 
-			'[user_firstname]' => $user_info['user_firstname'], 
-			'[user_lastname]' => $user_info['user_lastname'], 
-			'[activation_link]' => $activation_link, 
-			'[days_until_suspension]' => $user_info['days_until_suspension'], 
+			'[username]' => $user_info['username'],
+			'[user_firstname]' => $user_info['user_firstname'],
+			'[user_lastname]' => $user_info['user_lastname'],
+			'[activation_link]' => $activation_link,
+			'[days_until_suspension]' => $user_info['days_until_suspension'],
 			'[suspension_date]' => $user_info['suspension_date']
 		];
 
