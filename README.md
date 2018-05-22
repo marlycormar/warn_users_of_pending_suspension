@@ -11,6 +11,8 @@ A REDCap external module that will warn users of pending suspensions and provide
 
 ## Configuration
 
+The module is configurable at the system level to allow the subject line and body of the message to be customized. The message body supports parameter substitution like REDCap's data piping to allow messages to be customized with fields like `[username]`, `[user_firstname]`, `[user_lastname]`, `[activation_link]`, `[days_until_suspension]` and `[suspension_date]`. The `[activation_link]` is used to prevent account suspension.
+
 ### Email Configuration Example
 
 - Email Subject: 
