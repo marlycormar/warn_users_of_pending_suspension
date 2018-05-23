@@ -4,12 +4,6 @@
  * Provides ExternalModule class for SuspensionWarning.
  */
 
-/*
-TODO:
-- log cron messages for both succ. and unsucc.
-
-*/
-
 namespace SuspensionWarning\ExternalModule;
 
 use ExternalModules\AbstractExternalModule;
@@ -38,6 +32,8 @@ class ExternalModule extends AbstractExternalModule {
 
 		$days = $this->getSystemSetting('wups_notifications') ?? '1';
 		$days = array_map("intval", explode(",", $days));
+
+		$numNotificationsSent = 0;
 
 		foreach($days as $day){
 			$sql = "select * from (
@@ -68,13 +64,18 @@ class ExternalModule extends AbstractExternalModule {
 						'to' => $row['user_email']
 					];
 
-					if(!self::sendEmail($user_info))
-						print("Unable to send email to ". $row['user_firstname'].".");
+					if(!self::sendEmail($user_info)){
+						//print("Unable to send email to ". $row['user_firstname'].".");
+						$numNotificationsSent++;
+					}
 					else
-						print("The message to " .$row['user_firstname']. " was succesfull.");
+						//print("The message to " .$row['user_firstname']. " was succesfull.");
 				}
 			}
 		}
+
+		if($numNotificationsSent > 0)
+			$GLOBALS['redcapCronJobReturnMsg'] = "$numNotificationsSent warnings of account suspension have been sent.";
 	}
 
 	function sendEmail($user_info) {
