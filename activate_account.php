@@ -21,4 +21,7 @@ else {
 	db_query($sql);
 	
 	print_r("Your account suspension time has been succesfully extended.");
+
+	// Logging event
+	Logging::logEvent($sql, "redcap_user_information", "MANAGE", $_GET["username"], "username = '$_GET["username"]'", "Extend user suspension date.", "", "SYSTEM");
 }
