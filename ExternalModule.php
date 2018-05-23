@@ -25,7 +25,7 @@ class ExternalModule extends AbstractExternalModule {
 	function warn_users_account_suspension_cron()
 	{
 		global $suspend_users_inactive_type, $suspend_users_inactive_days,
-			   $suspend_users_inactive_send_email;
+			   $suspend_users_inactive_send_email, $project_contact_email;
 
 		// If feature is not enabled, then return
 		if ($suspend_users_inactive_type == '' || !is_numeric($suspend_users_inactive_days) || $suspend_users_inactive_days < 1) return;
@@ -66,10 +66,10 @@ class ExternalModule extends AbstractExternalModule {
 
 					if(!self::sendEmail($user_info)){
 						//print("Unable to send email to ". $row['user_firstname'].".");
-						$numNotificationsSent++;
 					}
 					else
 						//print("The message to " .$row['user_firstname']. " was succesfull.");
+						$numNotificationsSent++;
 				}
 			}
 		}
@@ -80,7 +80,7 @@ class ExternalModule extends AbstractExternalModule {
 
 	function sendEmail($user_info) {
 		$to = $user_info['to'];
-		$sender = 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
+		$sender = $project_contact_email ?? 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
 		$activation_link = APP_PATH_WEBROOT_FULL . "modules/" . basename(dirname(__FILE__)) . "/activate_account.php?username=" . $user_info['username'];
