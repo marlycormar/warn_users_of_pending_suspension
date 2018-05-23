@@ -83,7 +83,7 @@ class ExternalModule extends AbstractExternalModule {
 		$sender = $project_contact_email ?? 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
-		$activation_link = APP_PATH_WEBROOT_FULL . "modules/" . basename(dirname(__FILE__)) . "/activate_account.php?username=" . $user_info['username'];
+		$activation_link = $this->getUrl('activate_account.php'). "&username=" . $user_info['username'];
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'],
