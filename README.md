@@ -45,8 +45,4 @@ To revise the set of test users `alice`, `bob`, `dan`, and `carol` to receive me
 
     update redcap_user_information set user_email = 'you@example.org' where username in ("alice", "bob", "carol", "dan");
 
-When tested, each of four users should get a message.  To trigger the cron job, uncomment this line in ExternalModule.php:
-
-    function redcap_every_page_top($project_id) {
-        //self::warn_users_account_suspension_cron();
-    }
+When tested, each of the four users aforthmentioned should get a message. To trigger the cron job, change `cron_frequency` and `cron_max_run_time` on the **config.json** file so that the cron job runs more often. For example, with the configuration `"cron_frequency": "60"` and `"cron_max_run_time": "10"`, the cron job will run every minute (60s) with a maximum run time of 10s.
