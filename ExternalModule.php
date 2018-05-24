@@ -15,17 +15,9 @@ use REDCap;
  */
 class ExternalModule extends AbstractExternalModule {
 
-	/*
-    * @inheritdoc
-    */
-    function redcap_every_page_top($project_id) {
-    	//self::warn_users_account_suspension_cron();
-    }
-
 	function warn_users_account_suspension_cron()
 	{
-		global $suspend_users_inactive_type, $suspend_users_inactive_days,
-			   $suspend_users_inactive_send_email, $project_contact_email;
+		global $suspend_users_inactive_type, $suspend_users_inactive_days, $project_contact_email;
 
 		// If feature is not enabled, then return
 		if ($suspend_users_inactive_type == '' || !is_numeric($suspend_users_inactive_days) || $suspend_users_inactive_days < 1) return;
@@ -64,11 +56,7 @@ class ExternalModule extends AbstractExternalModule {
 						'to' => $row['user_email']
 					];
 
-					if(!self::sendEmail($user_info)){
-						//print("Unable to send email to ". $row['user_firstname'].".");
-					}
-					else
-						//print("The message to " .$row['user_firstname']. " was succesfull.");
+					if(self::sendEmail($user_info))
 						$numNotificationsSent++;
 				}
 			}
