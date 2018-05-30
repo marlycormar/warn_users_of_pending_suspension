@@ -36,7 +36,18 @@ The module is configurable at the system level to allow the subject line and bod
 
 ## Developer testing techniques
 
-To revise the set of test users `alice`, `bob`, `dan`, and `carol` to receive messages based on the above configuration, change their `user_lastlogin` and `user_lastactivity` dates as follows:
+To test this feature, you need to turn on a few redcap features it interacts with.  You need to turn on "Auto-suspend users after period of inactivity" in Control Center, User Settings.  For our tests we also set "Period of inactivity" to 30 days.  A lazy developer might just want to run the SQL to make that happen:
+
+    update redcap_config set value="all" where field_name = "suspend_users_inactive_type";
+    update redcap_config set value="1" where field_name = "suspend_users_inactive_send_email";
+    update redcap_config set value="30" where field_name = "suspend_users_inactive_days";
+
+As this tool sends email, make sure the from address are configured correctly in your redcap system. This tool uses "Email Address of REDCap Administrator" in the REDCap Control Center, General Configuration tab and it's always a good idea to set a valid "universal 'FROM' email address".  Those can be set quickly via SQL if you are so inclined. Here's an example of how a lazy developer at the University of Florida might do that:
+
+    update redcap_config set value="please-do-not-reply@ufl.edu" where field_name = "from_email";
+    update redcap_config set value="please-do-not-reply@ufl.edu" where field_name = "project_contact_email";
+
+You'll also need some test users.  To revise the set of test users `alice`, `bob`, `dan`, and `carol` to receive messages based on the above configuration, change their `user_lastlogin` and `user_lastactivity` dates as follows:
 
     update redcap_user_information set user_lastlogin = date_add(now(), interval -22 day), user_lastactivity = date_add(now(), interval -10 day) where username='alice';
     update redcap_user_information set user_lastlogin = date_add(now(), interval -18 day), user_lastactivity = NULL where username='bob';
@@ -45,4 +56,12 @@ To revise the set of test users `alice`, `bob`, `dan`, and `carol` to receive me
 
     update redcap_user_information set user_email = 'you@example.org' where username in ("alice", "bob", "carol", "dan");
 
-When tested, each of the four users aforthmentioned should get a message. To trigger the cron job, change `cron_frequency` and `cron_max_run_time` on the **config.json** file so that the cron job runs more often. For example, with the configuration `"cron_frequency": "60"` and `"cron_max_run_time": "10"`, the cron job will run every minute (60s) with a maximum run time of 10s.
+When tested, each of the aforementioned users should get a message. FYI, the above set of test users can be created via the SQL file at https://github.com/ctsit/redcap_deployment/blob/master/deploy/files/test_with_table_based_authentication.sql
+
+The final step to facilitate testing is to turn the frequency of the cron job up.  You can change `cron_frequency` and `cron_max_run_time` in the **config.json** file so that the cron job runs more often. For example, with the configuration `"cron_frequency": "60"` and `"cron_max_run_time": "10"`, the cron job will run every minute (60s) with a maximum run time of 10s. Then disable and re-enable the `Warn Users of Pending Suspension` module to write these new values into the cron database entry. Of course there's the lazy developers SQL method as well.
+
+    update redcap_crons set cron_frequency = 60, cron_max_run_time = 10 where cron_name = "warn_users_account_suspension_cron";
+
+Revert the setting to the defaults with this SQL when you are done with testing:
+
+    update redcap_crons set cron_frequency = 86400, cron_max_run_time = 1200 where cron_name = "warn_users_account_suspension_cron";
