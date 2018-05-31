@@ -17,16 +17,18 @@ class ExternalModule extends AbstractExternalModule {
  	/**
      * @inheritdoc
      */
-        // This method will be called by the redcap_data_entry_form hook
-    function redcap_every_page_top($project_id) 
+    function redcap_every_page_before_render($project_id) 
     {
-    	$this->warn_users_account_suspension_cron();
-    	$base_page = 'redcap/index.php?action=myprojects';
+    	$base_page = 'redcap/?username=';
 
     	if(substr(PAGE, 0, strlen($base_page)) === $base_page)
      	{
+     		#echo PAGE; $this->exitAfterHook(); return;
+
      		$this -> display_popup($_GET["username"]);
 		}
+
+		#$this -> warn_users_account_suspension_cron();
     }
 
     function display_popup($username=''){
@@ -42,12 +44,10 @@ class ExternalModule extends AbstractExternalModule {
 			$message = "Your account suspension time has been succesfully extended.";
 
 			// Logging event
-			Logging::logEvent($sql, "redcap_user_information", "MANAGE", $username, "username = '$username'", "Extend user suspension date.", "", "SYSTEM");
+			#Logging::logEvent($sql, "redcap_user_information", "MANAGE", $username, "username = '$username'", "Extend user suspension date.", "", "SYSTEM");
 		}
 
-		echo '<script language="javascript">';
-		echo 'alert('. $message .')';
-		echo '</script>';
+		echo "<script type='text/javascript'>alert('$message');</script>";
     }
 
 	function warn_users_account_suspension_cron()
@@ -106,7 +106,7 @@ class ExternalModule extends AbstractExternalModule {
 		$sender = $project_contact_email ?? 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
-		$activation_link = APP_PATH_WEBROOT_FULL . "?action=myprojects&username=" . $user_info['username'];
+		$activation_link = APP_PATH_WEBROOT_FULL . "?username=" . $user_info['username'];
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'],
