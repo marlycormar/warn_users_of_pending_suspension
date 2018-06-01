@@ -9,6 +9,7 @@ namespace SuspensionWarning\ExternalModule;
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 use REDCap;
+use Logging;
 
 /**
  * ExternalModule class for SuspensionWarning.
@@ -22,16 +23,11 @@ class ExternalModule extends AbstractExternalModule {
     	$base_page = 'redcap/?username=';
 
     	if(substr(PAGE, 0, strlen($base_page)) === $base_page)
-     	{
-     		#echo PAGE; $this->exitAfterHook(); return;
-
      		$this -> display_popup($_GET["username"]);
-		}
-
-		#$this -> warn_users_account_suspension_cron();
     }
 
-    function display_popup($username=''){
+    function display_popup($username='')
+    {
     	$message = '';
 
 		if($username == '') 
@@ -44,7 +40,7 @@ class ExternalModule extends AbstractExternalModule {
 			$message = "Your account suspension time has been succesfully extended.";
 
 			// Logging event
-			#Logging::logEvent($sql, "redcap_user_information", "MANAGE", $username, "username = '$username'", "Extend user suspension date.", "", "SYSTEM");
+			Logging::logEvent($sql, "redcap_user_information", "MANAGE", $username, "username = '$username'", "Extend user suspension date.", "", "SYSTEM");
 		}
 
 		echo "<script type='text/javascript'>alert('$message');</script>";
@@ -117,9 +113,8 @@ class ExternalModule extends AbstractExternalModule {
 			'[suspension_date]' => $user_info['suspension_date']
 		];
 
-		foreach (array_keys($piping_pairs) as $key){
+		foreach (array_keys($piping_pairs) as $key)
 			$body = str_replace($key, $piping_pairs[$key], $body);
-		}
 
 		$success = REDCap::email($to, $sender, $subject, $body);
 
