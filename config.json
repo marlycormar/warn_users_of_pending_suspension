@@ -3,7 +3,7 @@
     "namespace": "SuspensionWarning\\ExternalModule",
     "description": "A REDCap external module that will warn users of pending suspensions and provide an easy opportunity to extend the life of REDCap accounts.",
     "permissions": [
-        "redcap_every_page_top"
+        "redcap_every_page_before_render"
     ],
     "enable-every-page-hooks-on-system-pages": true,
     "authors": [
