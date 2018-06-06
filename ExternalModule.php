@@ -20,18 +20,20 @@ class ExternalModule extends AbstractExternalModule {
      */
     function redcap_every_page_before_render($project_id) 
     {
-    	$base_page = 'redcap/?username=';
-
-    	if(substr(PAGE, 0, strlen($base_page)) === $base_page)
-     		$this -> display_popup($_GET["username"]);
+    	if(USERID and $_GET["wups_username"]){
+    		$this->extend_suspension_time($_GET["wups_username"]);
+    	}
     }
 
-    function display_popup($username='')
+    function extend_suspension_time($username='')
     {
     	$message = '';
 
 		if($username == '') 
 			$message = "We are unable to extend your account suspension time. Please contact the REDCap Support Team.";
+		elseif($username != USERID){
+			$message = "Unable to extend account suspension time: you need to log in with your credentials.";
+		}
 		else {
 			$sql = "update redcap_user_information set user_lastactivity = NOW(), user_lastlogin = NOW() where username ='$username';";
 
@@ -102,7 +104,7 @@ class ExternalModule extends AbstractExternalModule {
 		$sender = $project_contact_email ?? 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
-		$activation_link = APP_PATH_WEBROOT_FULL . "?username=" . $user_info['username'];
+		$activation_link = APP_PATH_WEBROOT_FULL . "?wups_username=" . $user_info['username'];
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'],
