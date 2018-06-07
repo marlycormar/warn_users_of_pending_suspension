@@ -1,0 +1,68 @@
+{
+    "name": "Warn Users of Pending Suspension",
+    "namespace": "SuspensionWarning\\ExternalModule",
+    "description": "A REDCap external module that will warn users of pending suspensions and provide an easy opportunity to extend the life of REDCap accounts.",
+    "permissions": [
+        "redcap_every_page_top"
+    ],
+    "enable-every-page-hooks-on-system-pages": true,
+    "authors": [
+        {
+            "name": "Marly Cormar",
+            "email": "marlycormar@ufl.edu",
+            "institution": "University of Florida - CTSI"
+        },
+        {
+            "name": "Philip Chase",
+            "email": "pbc@ufl.edu",
+            "institution": "University of Florida - CTSI"
+        },
+        {
+            "name": "Taryn Stoffs",
+            "email": "tls@ufl.edu",
+            "institution": "University of Florida - CTSI"
+        },
+        {
+            "name": "Tiago Bember",
+            "email": "tbembersimeao@ufl.edu",
+            "institution": "University of Florida - CTSI"
+        }
+    ],
+    "system-settings" : [
+        {
+            "key": "wups_subject",
+            "name": "Email Subject",
+            "required": false,
+            "type": "text",
+            "repeatable": false
+        },
+        {
+            "key": "wups_body",
+            "name": "Email Body",
+            "required": false,
+            "type": "textarea",
+            "repeatable": false
+        },
+        {
+            "key": "wups_notifications",
+            "name": "Days Before Suspension",
+            "description": "These are the days before suspension when notifications will be sent.",
+            "required": false,
+            "type": "textarea",
+            "repeatable": false
+        }
+    ],
+    "crons": [
+        {
+            "cron_name": "warn_users_account_suspension_cron",
+            "cron_description": "Cron that runs daily to warn users of future account suspensions.",
+            "method": "warn_users_account_suspension_cron",
+            "cron_frequency": "86400",
+            "cron_max_run_time": "1200"
+        }
+    ],
+    "compatibility": {
+        "redcap-version-min": "8.0.3",
+        "redcap-version-max": ""
+   }
+}
