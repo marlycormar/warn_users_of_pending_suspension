@@ -18,7 +18,7 @@ class ExternalModule extends AbstractExternalModule {
  	/**
      * @inheritdoc
      */
-    function redcap_every_page_top($project_id) 
+    function redcap_every_page_top($project_id)
     {
     	if(defined('USERID') && !empty(USERID) && $_GET["wups_username"]){
     		$this->extend_suspension_time($_GET["wups_username"]);
@@ -29,7 +29,7 @@ class ExternalModule extends AbstractExternalModule {
     {
     	$message = '';
 
-		if($username == '') 
+		if($username == '')
 			$message = "We are unable to extend your account suspension time. Please contact the REDCap Support Team.";
 		elseif($username != USERID){
 			$message = "Unable to extend account suspension time: you need to log in with your credentials.";
@@ -38,7 +38,7 @@ class ExternalModule extends AbstractExternalModule {
 			$sql = "update redcap_user_information set user_lastactivity = NOW(), user_lastlogin = NOW() where username ='$username';";
 
 			db_query($sql);
-			
+
 			$message = "Your account suspension time has been succesfully extended.";
 
 			// Logging event
@@ -55,7 +55,7 @@ class ExternalModule extends AbstractExternalModule {
 		// If feature is not enabled, then return
 		if ($suspend_users_inactive_type == '' || !is_numeric($suspend_users_inactive_days) || $suspend_users_inactive_days < 1) return;
 
-		$days = $this->getSystemSetting('wups_notifications') ?? '1';
+		$days = $this->getSystemSetting('wups_notifications') ?: '1';
 		$days = array_map("intval", explode(",", $days));
 
 		$numNotificationsSent = 0;
@@ -101,7 +101,7 @@ class ExternalModule extends AbstractExternalModule {
 
 	function sendEmail($user_info) {
 		$to = $user_info['to'];
-		$sender = $project_contact_email ?? 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
+		$sender = $project_contact_email ?: 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
 		$activation_link = APP_PATH_WEBROOT_FULL . "?wups_username=" . $user_info['username'];
