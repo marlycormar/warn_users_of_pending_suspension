@@ -5,6 +5,7 @@
     "permissions": [
         "redcap_every_page_top"
     ],
+    "enable-every-page-hooks-on-system-pages": true,
     "authors": [
         {
             "name": "Marly Cormar",

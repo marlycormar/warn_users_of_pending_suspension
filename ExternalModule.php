@@ -9,11 +9,44 @@ namespace SuspensionWarning\ExternalModule;
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 use REDCap;
+use Logging;
 
 /**
  * ExternalModule class for SuspensionWarning.
  */
 class ExternalModule extends AbstractExternalModule {
+ 	/**
+     * @inheritdoc
+     */
+    function redcap_every_page_top($project_id) 
+    {
+    	if(defined('USERID') && !empty(USERID) && $_GET["wups_username"]){
+    		$this->extend_suspension_time($_GET["wups_username"]);
+    	}
+    }
+
+    function extend_suspension_time($username='')
+    {
+    	$message = '';
+
+		if($username == '') 
+			$message = "We are unable to extend your account suspension time. Please contact the REDCap Support Team.";
+		elseif($username != USERID){
+			$message = "Unable to extend account suspension time: you need to log in with your credentials.";
+		}
+		else {
+			$sql = "update redcap_user_information set user_lastactivity = NOW(), user_lastlogin = NOW() where username ='$username';";
+
+			db_query($sql);
+			
+			$message = "Your account suspension time has been succesfully extended.";
+
+			// Logging event
+			Logging::logEvent($sql, "redcap_user_information", "MANAGE", $username, "username = '$username'", "Extend user suspension date.", "", "SYSTEM");
+		}
+
+		echo "<script type='text/javascript'>alert('$message');</script>";
+    }
 
 	function warn_users_account_suspension_cron()
 	{
@@ -71,7 +104,7 @@ class ExternalModule extends AbstractExternalModule {
 		$sender = $project_contact_email ?? 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
-		$activation_link = $this->getUrl('activate_account.php'). "&username=" . $user_info['username'];
+		$activation_link = APP_PATH_WEBROOT_FULL . "?wups_username=" . $user_info['username'];
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'],
@@ -82,9 +115,8 @@ class ExternalModule extends AbstractExternalModule {
 			'[suspension_date]' => $user_info['suspension_date']
 		];
 
-		foreach (array_keys($piping_pairs) as $key){
+		foreach (array_keys($piping_pairs) as $key)
 			$body = str_replace($key, $piping_pairs[$key], $body);
-		}
 
 		$success = REDCap::email($to, $sender, $subject, $body);
 
