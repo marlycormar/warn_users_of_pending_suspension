@@ -62,7 +62,7 @@ class ExternalModule extends AbstractExternalModule {
 
 		foreach($days as $day){
 			$sql = "select * from (
-					select username, user_email, user_sponsor, user_firstname, user_lastname, user_lastactivity, user_lastlogin,
+					select username, user_email, user_firstname, user_lastname, user_lastactivity, user_lastlogin,
 					(case
 					when user_lastactivity is not null and user_lastlogin is not null then greatest(user_lastlogin, user_lastactivity)
 					when user_lastactivity is not null then user_lastactivity
