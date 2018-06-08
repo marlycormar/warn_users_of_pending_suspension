@@ -55,10 +55,13 @@ class ExternalModule extends AbstractExternalModule {
 	{
 		$message = '';
 
-		if($username == '')
+		if($username == ''){
 			$message = "We are unable to suspend your account at this time. Please contact the REDCap Support Team.";
+			echo "<script type='text/javascript'>alert('$message');</script>";
+		}
 		elseif($username != USERID){
 			$message = "Unable to suspend your account: you need to log in with your credentials.";
+			echo "<script type='text/javascript'>alert('$message');</script>";
 		}
 		else {
 			$sql = "update redcap_user_information set user_suspended_time=NOW() where username ='$username';";
@@ -70,10 +73,23 @@ class ExternalModule extends AbstractExternalModule {
 			// Logging event
 			Logging::logEvent($sql, "redcap_user_information", "MANAGE", $username, "username = '$username'", "Account suspended by user.", "", "SYSTEM");
 
+			echo "<script>
+			function dialogBox() {
+			    var message;
+			    var response = confirm('Are you sure you want your account to be suspended?');
+			    if (response == true) {
+			        message = 'Your account has been suspended.';
+			    }
+			    else {
+			        message = 'Your account was not suspended.';
+			    }
+			    alert(message);
+			}
+			</script>";
+
 			header("Refresh:0");
 		}
 
-		echo "<script type='text/javascript'>alert('$message');</script>";
 		$_GET["wups_suspend_account"] = '0';
 	}
 
