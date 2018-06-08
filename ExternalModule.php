@@ -131,12 +131,14 @@ class ExternalModule extends AbstractExternalModule {
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
 		$activation_link = APP_PATH_WEBROOT_FULL . "?wups_username=" . $user_info['username'];
+		$suspension_link = APP_PATH_WEBROOT_FULL . "?wups_username=" . $user_info['username'] . '&wups_suspend_account';
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'],
 			'[user_firstname]' => $user_info['user_firstname'],
 			'[user_lastname]' => $user_info['user_lastname'],
 			'[activation_link]' => $activation_link,
+			'[suspension_link]' => $suspension_link,
 			'[days_until_suspension]' => $user_info['days_until_suspension'],
 			'[suspension_date]' => $user_info['suspension_date']
 		];
