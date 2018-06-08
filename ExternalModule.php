@@ -21,7 +21,7 @@ class ExternalModule extends AbstractExternalModule {
 	function redcap_every_page_top($project_id)
 	{
 		if(defined('USERID') && !empty(USERID) && !empty($_GET["wups_username"])){
-			if(!empty($_GET["wups_suspend_account"]))
+			if($_GET["wups_suspend_account"] == '1')
 				$this->suspend_account($_GET["wups_username"]);
 			else
 				$this->extend_suspension_time($_GET["wups_username"]);
@@ -131,7 +131,7 @@ class ExternalModule extends AbstractExternalModule {
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
 		$activation_link = APP_PATH_WEBROOT_FULL . "?wups_username=" . $user_info['username'];
-		$suspension_link = APP_PATH_WEBROOT_FULL . "?wups_username=" . $user_info['username'] . '&wups_suspend_account';
+		$suspension_link = APP_PATH_WEBROOT_FULL . "?wups_username=" . $user_info['username'] . '&wups_suspend_account=1';
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'],
