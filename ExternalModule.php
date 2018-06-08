@@ -69,9 +69,12 @@ class ExternalModule extends AbstractExternalModule {
 
 			// Logging event
 			Logging::logEvent($sql, "redcap_user_information", "MANAGE", $username, "username = '$username'", "Account suspended by user.", "", "SYSTEM");
+
+			header("Refresh:0");
 		}
 
 		echo "<script type='text/javascript'>alert('$message');</script>";
+		$_GET["wups_suspend_account"] = '0';
 	}
 
 	function warn_users_account_suspension_cron()
