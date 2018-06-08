@@ -25,10 +25,16 @@ The module is configurable at the system level to allow the subject line and bod
 
         Your account will be suspended in [days_until_suspension] days on [suspension_date].
         If you want to avoid account suspension, please go to
-        <a href="[activation_link]">REDCap account extension</a>. <br><br>
+        <a href="[activation_link]">REDCap account extension</a>. 
+        <br><br>
 
         Regards,<br>
         REDCap Support Team.
+
+        <br><br>
+        <p><small> If you prefer to suspend your account, please go to 
+        <a href="[suspension_link]">REDCap account suspension</a>.
+        </small></p>
 
 - Days Before Suspension:
 
