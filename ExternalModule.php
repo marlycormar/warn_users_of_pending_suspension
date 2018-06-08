@@ -15,22 +15,22 @@ use Logging;
  * ExternalModule class for SuspensionWarning.
  */
 class ExternalModule extends AbstractExternalModule {
- 	/**
-     * @inheritdoc
-     */
-    function redcap_every_page_top($project_id)
-    {
+	/**
+	 * @inheritdoc
+	 */
+	function redcap_every_page_top($project_id)
+	{
 		if(defined('USERID') && !empty(USERID) && !empty($_GET["wups_username"])){
 			if(!empty($_GET["wups_suspend_account"]))
 				$this->suspend_account($_GET["wups_username"]);
 			else
 				$this->extend_suspension_time($_GET["wups_username"]);
-    	}
-    }
+		}
+	}
 
-    function extend_suspension_time($username='')
-    {
-    	$message = '';
+	function extend_suspension_time($username='')
+	{
+		$message = '';
 
 		if($username == '')
 			$message = "We are unable to extend your account suspension time. Please contact the REDCap Support Team.";
@@ -49,7 +49,30 @@ class ExternalModule extends AbstractExternalModule {
 		}
 
 		echo "<script type='text/javascript'>alert('$message');</script>";
-    }
+	}
+
+	function suspend_account($username='')
+	{
+		$message = '';
+
+		if($username == '')
+			$message = "We are unable to suspend your account at this time. Please contact the REDCap Support Team.";
+		elseif($username != USERID){
+			$message = "Unable to suspend your account: you need to log in with your credentials.";
+		}
+		else {
+			$sql = "update redcap_user_information set user_suspended_time=NOW() where username ='$username';";
+
+			db_query($sql);
+
+			$message = "Your account has been suspended.";
+
+			// Logging event
+			Logging::logEvent($sql, "redcap_user_information", "MANAGE", $username, "username = '$username'", "Account suspended by user.", "", "SYSTEM");
+		}
+
+		echo "<script type='text/javascript'>alert('$message');</script>";
+	}
 
 	function warn_users_account_suspension_cron()
 	{
