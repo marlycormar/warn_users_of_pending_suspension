@@ -20,8 +20,11 @@ class ExternalModule extends AbstractExternalModule {
      */
     function redcap_every_page_top($project_id)
     {
-    	if(defined('USERID') && !empty(USERID) && $_GET["wups_username"]){
-    		$this->extend_suspension_time($_GET["wups_username"]);
+		if(defined('USERID') && !empty(USERID) && !empty($_GET["wups_username"])){
+			if(!empty($_GET["wups_suspend_account"]))
+				$this->suspend_account($_GET["wups_username"]);
+			else
+				$this->extend_suspension_time($_GET["wups_username"]);
     	}
     }
 
