@@ -78,13 +78,13 @@ This will make the WUPS warnings start in 0-30 days. If the warnings are unheede
 
 ## Developer testing techniques
 
-To test this feature, you need to turn on a few redcap features it interacts with.  You need to turn on "Auto-suspend users after period of inactivity" in Control Center, User Settings.  For our tests we also set "Period of inactivity" to 30 days.  A lazy developer might just want to run the SQL to make that happen:
+To test WUPS, you need to turn on a few REDCap features it interacts with.  You need to turn on "Auto-suspend users after period of inactivity" in Control Center, User Settings.  For our tests we also set "Period of inactivity" to 30 days.  A lazy developer might just want to run this SQL to make that happen:
 
     update redcap_config set value="all" where field_name = "suspend_users_inactive_type";
     update redcap_config set value="1" where field_name = "suspend_users_inactive_send_email";
     update redcap_config set value="30" where field_name = "suspend_users_inactive_days";
 
-As this tool sends email, make sure the from address are configured correctly in your redcap system. This tool uses "Email Address of REDCap Administrator" in the REDCap Control Center, General Configuration tab and it's always a good idea to set a valid "universal 'FROM' email address".  Those can be set quickly via SQL if you are so inclined. Here's an example of how a lazy developer at the University of Florida might do that:
+As this tool sends email, make sure the from address is configured correctly in your REDCap system. This tool uses "Email Address of REDCap Administrator" in the REDCap Control Center, General Configuration tab.  It's also good idea to set a valid "universal 'FROM' email address" on that same page.  Those can be set quickly via SQL if you are so inclined. Here's an example of how a lazy developer at the University of Florida might do that:
 
     update redcap_config set value="please-do-not-reply@ufl.edu" where field_name = "from_email";
     update redcap_config set value="please-do-not-reply@ufl.edu" where field_name = "project_contact_email";
@@ -98,9 +98,9 @@ You'll also need some test users.  To revise the set of test users `alice`, `bob
 
     update redcap_user_information set user_email = 'you@example.org' where username in ("alice", "bob", "carol", "dan");
 
-When tested, each of the aforementioned users should get a message. FYI, the above set of test users can be created via the SQL file at https://github.com/ctsit/redcap_deployment/blob/master/deploy/files/test_with_table_based_authentication.sql
+When tested, each of the aforementioned users should get a message. FYI, the above set of test users can be created via the SQL file at [https://github.com/ctsit/redcap_deployment/blob/master/deploy/files/test\_with\_table\_based\_authentication.sql](https://github.com/ctsit/redcap_deployment/blob/master/deploy/files/test_with_table_based_authentication.sql). That SQL file works great for users of the redcap_deployment project. Other users might want to be cautious as the SQL makes some assumptions.
 
-The final step to facilitate testing is to turn the frequency of the cron job up.  You can change `cron_frequency` and `cron_max_run_time` in the **config.json** file so that the cron job runs more often. For example, with the configuration `"cron_frequency": "60"` and `"cron_max_run_time": "10"`, the cron job will run every minute (60s) with a maximum run time of 10s. Then disable and re-enable the `Warn Users of Pending Suspension` module to write these new values into the cron database entry. Of course there's the lazy developers SQL method as well.
+The final step to facilitate testing is to turn the frequency of the cron job up.  You'll need to change `cron_frequency` and `cron_max_run_time` so that the cron job runs more often. Here's the lazy developer's SQL method to do that:
 
     update redcap_crons set cron_frequency = 60, cron_max_run_time = 10 where cron_name = "warn_users_account_suspension_cron";
 
