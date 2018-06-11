@@ -1,4 +1,4 @@
-# REDCap Warn Users of Pending Suspension
+# REDCap Warn Users of Pending Suspension (WUPS)
 
 A REDCap external module that will warn users of pending suspensions and provide an easy opportunity to extend the life of REDCap accounts.
 
@@ -8,6 +8,11 @@ A REDCap external module that will warn users of pending suspensions and provide
 ## Installation
 - Clone this repo into to `<redcap-root>/modules/warn_users_of_pending_suspension_v<version_number>`.
 - Go to **Control Center > External Modules** and enable Warn Users of Pending Suspension.
+
+## REDCap Requirements
+
+WUPS is dependent upon REDCap's normal _Auto-suspend users after period of inactivity_ feature being enabled. WUPS does not suspend accounts it only _warns_ of pending suspending via emails.
+
 
 ## Configuration
 
@@ -33,6 +38,43 @@ The module is configurable at the system level to allow the subject line and bod
 - Days Before Suspension:
 
         10, 12, 20
+
+
+
+## How to Implement WUPS and Account Suspensions
+
+Implementing WUPS and/or activating REDCap account suspensions can require some careful planning to avoid annoying your users who have not logged in recently.  If you have never used account suspension on your REDCap host, activating it will cause all accounts that have not logged in within the _Period of inactivity_ to be suspended within 24 hours. If those people want their accounts reenabled they will have to ask the REDCap admin to reenable them.  That generates the kind of help desk workload WUPS was designed to _prevent_.
+
+To avoid the chaos of hundreds of accounts getting prematurely suspended, you can run a few SQL queries to adjust the last login dates and last activity dates for your REDCap users.  Done correctly, you can use WUPS to warn these users of the pending suspension, allow interested REDCap users to renew their account, and let the rest suspended normally.
+
+The first step is to configure WUPS' _Days Before Suspension_.  In this example, we'll use `30, 15, 7, 3, 1`, but only the highest number affects our work. We've also set _Period of inactivity_ to 180 days. We want everyone who is approaching their date of suspension to receive every warning WUPS is configured to provide. To achieve that, _no one_ is allowed to be within 30 days of suspension when WUPS is turned on. This requires some accounts have their date of last login and last activity changed.
+
+To change the last login and last activity dates, we first need to identify who needs the change.  This query will return all the usernames of accounts will expire within the next 30 days when _Period of inactivity_ is set to 180 days:
+
+    create temporary table old_users as (
+    select * from (
+         select username,
+         (case
+              when user_lastactivity is not null and user_lastlogin is not null then greatest(user_lastlogin, user_lastactivity)
+              when user_lastactivity is not null then user_lastactivity
+              when user_lastlogin is not null then user_lastlogin
+              when user_creation is not null then user_creation
+              end) as user_last_date
+         from redcap_user_information
+         where user_suspended_time is null
+         ) as my_user_info
+    where DATEDIFF(NOW(), user_last_date) > (180 - 30)
+    );
+
+With that temporary table created, it is a simple matter to change `user_lastactivity` and `user_lastlogin` to  random date between 120 and 150 days.
+
+    update redcap_user_information
+    set user_lastactivity = date_add(now(), INTERVAL FLOOR(-RAND() * 30  - 120) DAY),
+        user_lastlogin = date_add(now(), INTERVAL FLOOR(-RAND() * 30  - 120) DAY)
+    where username in ( select username from old_users);
+
+This will make the WUPS warnings start in 0-30 days. If the warnings are unheeded, account suspensions will happen in 30-60 days.
+
 
 ## Developer testing techniques
 
