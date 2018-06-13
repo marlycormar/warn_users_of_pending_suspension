@@ -45,11 +45,11 @@ The module is configurable at the system level to allow the subject line and bod
 
 Implementing WUPS and/or activating REDCap account suspensions can require some careful planning to avoid annoying your users who have not logged in recently.  If you have never used account suspension on your REDCap host, activating it will cause all accounts that have not logged in within the _Period of inactivity_ to be suspended within 24 hours. If those people want their accounts reenabled they will have to ask the REDCap admin to reenable them.  That generates the kind of help desk workload WUPS was designed to _prevent_.
 
-To avoid the chaos of hundreds of accounts getting prematurely suspended, you can run a few SQL queries to adjust the last login dates and last activity dates for your REDCap users.  Done correctly, you can use WUPS to warn these users of the pending suspension, allow interested REDCap users to renew their account, and let the rest suspended normally.
+To avoid the chaos of hundreds of accounts getting prematurely suspended, you can run a few SQL queries to adjust the last login dates and last activity dates for your REDCap users.  Done correctly, you can use WUPS to warn these users of the pending suspension, allow interested REDCap users to renew their account, and let the rest suspend normally.
 
 The first step is to configure WUPS' _Days Before Suspension_.  In this example, we'll use `30, 15, 7, 3, 1`, but only the highest number affects our work. We've also set _Period of inactivity_ to 180 days. We want everyone who is approaching their date of suspension to receive every warning WUPS is configured to provide. To achieve that, _no one_ is allowed to be within 30 days of suspension when WUPS is turned on. This requires some accounts have their date of last login and last activity changed.
 
-To change the last login and last activity dates, we first need to identify who needs the change.  This query will return all the usernames of accounts will expire within the next 30 days when _Period of inactivity_ is set to 180 days:
+To change the last login and last activity dates, we first need to identify who needs the change.  This query will return all the usernames of accounts that will expire within the next 30 days when _Period of inactivity_ is set to 180 days:
 
     create temporary table old_users as (
     select * from (
@@ -66,7 +66,7 @@ To change the last login and last activity dates, we first need to identify who 
     where DATEDIFF(NOW(), user_last_date) > (180 - 30)
     );
 
-With that temporary table created, it is a simple matter to change `user_lastactivity` and `user_lastlogin` to  random date between 120 and 150 days.
+With that temporary table created, it is a simple matter to change `user_lastactivity` and `user_lastlogin` to a random date between 120 and 150 days.
 
     update redcap_user_information
     set user_lastactivity = date_add(now(), INTERVAL FLOOR(-RAND() * 30  - 120) DAY),
@@ -84,7 +84,7 @@ To test WUPS, you need to turn on a few REDCap features it interacts with.  You 
     update redcap_config set value="1" where field_name = "suspend_users_inactive_send_email";
     update redcap_config set value="30" where field_name = "suspend_users_inactive_days";
 
-As this tool sends email, make sure the from address is configured correctly in your REDCap system. This tool uses "Email Address of REDCap Administrator" in the REDCap Control Center, General Configuration tab.  It's also good idea to set a valid "universal 'FROM' email address" on that same page.  Those can be set quickly via SQL if you are so inclined. Here's an example of how a lazy developer at the University of Florida might do that:
+As this tool sends email, make sure the from address is configured correctly in your REDCap system. This tool uses "Email Address of REDCap Administrator" in the REDCap Control Center, General Configuration tab.  It's also a good idea to set a valid "universal 'FROM' email address" on that same page.  Those can be set quickly via SQL if you are so inclined. Here's an example of how a lazy developer at the University of Florida might do that:
 
     update redcap_config set value="please-do-not-reply@ufl.edu" where field_name = "from_email";
     update redcap_config set value="please-do-not-reply@ufl.edu" where field_name = "project_contact_email";
