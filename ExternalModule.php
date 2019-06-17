@@ -20,9 +20,13 @@ class ExternalModule extends AbstractExternalModule {
      */
     function redcap_every_page_top($project_id)
     {
-    	if(defined('USERID') && !empty(USERID) && $_GET["wups_username"]){
-    		$this->extend_suspension_time($_GET["wups_username"]);
-    	}
+        $is_on_homepage = preg_match("/\/index.php\z/", PAGE);
+
+        if ($is_on_homepage) {
+            if(defined('USERID') && !empty(USERID)){
+                $this->extend_suspension_time(USERID);
+            }
+        }
     }
 
     function extend_suspension_time($username='')
@@ -39,13 +43,13 @@ class ExternalModule extends AbstractExternalModule {
 
 			db_query($sql);
 
-			$message = "Your account suspension time has been succesfully extended.";
-
 			// Logging event
 			Logging::logEvent($sql, "redcap_user_information", "MANAGE", $username, "username = '$username'", "Extend user suspension date.", "", "SYSTEM");
 		}
 
-		echo "<script type='text/javascript'>alert('$message');</script>";
+        if ($message) {
+            echo "<script type='text/javascript'>alert('$message');</script>";
+        }
     }
 
 	function warn_users_account_suspension_cron()
@@ -104,13 +108,11 @@ class ExternalModule extends AbstractExternalModule {
 		$sender = $project_contact_email ?: 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
-		$activation_link = APP_PATH_WEBROOT_FULL . "?wups_username=" . $user_info['username'];
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'],
 			'[user_firstname]' => $user_info['user_firstname'],
 			'[user_lastname]' => $user_info['user_lastname'],
-			'[activation_link]' => $activation_link,
 			'[days_until_suspension]' => $user_info['days_until_suspension'],
 			'[suspension_date]' => $user_info['suspension_date']
 		];
