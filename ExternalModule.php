@@ -108,11 +108,13 @@ class ExternalModule extends AbstractExternalModule {
 		$sender = $project_contact_email ?: 'CTSI-REDCAP-SUPPORT-L@lists.ufl.edu';
 		$subject = $this->getSystemSetting("wups_subject");
 		$body = $this->getSystemSetting("wups_body");
+		$login_link = APP_PATH_WEBROOT_FULL;
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'],
 			'[user_firstname]' => $user_info['user_firstname'],
 			'[user_lastname]' => $user_info['user_lastname'],
+			'[login_link]' => $login_link,
 			'[days_until_suspension]' => $user_info['days_until_suspension'],
 			'[suspension_date]' => $user_info['suspension_date']
 		];
