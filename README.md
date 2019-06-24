@@ -16,7 +16,7 @@ WUPS is dependent upon REDCap's normal _Auto-suspend users after period of inact
 
 ## Configuration
 
-The module is configurable at the system level to allow the subject line and body of the message to be customized. The message body supports parameter substitution like REDCap's data piping to allow messages to be customized with fields like `[username]`, `[user_firstname]`, `[user_lastname]`, `[activation_link]`, `[days_until_suspension]` and `[suspension_date]`. The `[activation_link]` is used to prevent account suspension.
+The module is configurable at the system level to allow the subject line and body of the message to be customized. The message body supports parameter substitution like REDCap's data piping to allow messages to be customized with fields like `[username]`, `[user_firstname]`, `[user_lastname]`, `[login_link]`, `[days_until_suspension]` and `[suspension_date]`. The `[login_link]` is the REDCap login page.
 
 ### Email Configuration Example
 
@@ -29,8 +29,8 @@ The module is configurable at the system level to allow the subject line and bod
         Dear [user_firstname] [user_lastname], <br><br>
 
         Your account will be suspended in [days_until_suspension] days on [suspension_date].
-        If you want to avoid account suspension, please go to
-        <a href="[activation_link]">REDCap account extension</a>. <br><br>
+        If you want to avoid account suspension, please log in to
+        <a href="[login_link]">your REDCap account</a>. <br><br>
 
         Regards,<br>
         REDCap Support Team.
