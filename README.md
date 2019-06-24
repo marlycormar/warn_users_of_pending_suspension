@@ -5,7 +5,10 @@ A REDCap external module that will warn users of pending suspensions and provide
 ## Prerequisites
 - REDCap >= 8.0.3
 
-## Installation
+## Easy Installation
+- Obtain this module from the Consortium [REDCap Repo](https://redcap.vanderbilt.edu/consortium/modules/index.php) from the control center.
+
+## Manual Installation
 - Clone this repo into to `<redcap-root>/modules/warn_users_of_pending_suspension_v<version_number>`.
 - Go to **Control Center > External Modules** and enable Warn Users of Pending Suspension.
 
