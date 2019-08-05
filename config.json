@@ -45,7 +45,7 @@
             "key": "wups_body",
             "name": "Email Body",
             "required": false,
-            "type": "textarea",
+            "type": "rich-text",
             "repeatable": false
         },
         {
