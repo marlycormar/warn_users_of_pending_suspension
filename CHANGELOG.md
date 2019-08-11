@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to the REDCap Warn Users of Pending Suspension project will be documented in this file.
 
+## [2.0.1] - 2019-08-11
+### Added
+- change the email body to rich text to preview HTML (Kyle Chesney)
+
+
 ## [2.0.0] - 2019-06-24
 ### Added
 - User last login and last activity updated upon visiting homepage (Kyle Chesney)
