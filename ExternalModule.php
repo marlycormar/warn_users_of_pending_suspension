@@ -20,9 +20,9 @@ class ExternalModule extends AbstractExternalModule {
      */
     function redcap_every_page_top($project_id)
     {
-        $is_on_homepage = preg_match("/\/index.php\z/", PAGE);
+        $is_on_log_page = preg_match("/(redcap\/\z|\/index.php\?action=myprojects\z)/", PAGE);
 
-        if ($is_on_homepage) {
+        if ($is_on_log_page) {
             if(defined('USERID') && !empty(USERID)){
                 $this->extend_suspension_time(USERID);
             }
