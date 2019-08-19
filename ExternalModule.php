@@ -22,7 +22,9 @@ class ExternalModule extends AbstractExternalModule {
     {
         $is_on_log_page = preg_match("/(redcap\/\z|\/index.php\?action=myprojects\z)/", PAGE);
 
-        if ($is_on_log_page) {
+        $is_on_homepage = preg_match("/\/index.php\z/", PAGE);
+
+        if ($is_on_log_page || $is_on_homepage) {
             if(defined('USERID') && !empty(USERID)){
                 $this->extend_suspension_time(USERID);
             }
