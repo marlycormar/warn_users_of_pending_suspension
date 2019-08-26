@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to the REDCap Warn Users of Pending Suspension project will be documented in this file.
 
+## [2.0.2] - 2019-08-26
+### Added
+- Check that the user clicked the homepage. (Marly Cormar)
+- log initial login page and myprojects page (Kyle Chesney)
+
+
 ## [2.0.1] - 2019-08-11
 ### Added
 - change the email body to rich text to preview HTML (Kyle Chesney)
