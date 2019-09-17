@@ -16,10 +16,13 @@ A REDCap external module that will warn users of pending suspensions and provide
 
 WUPS is dependent upon REDCap's normal _Auto-suspend users after period of inactivity_ feature being enabled. WUPS does not suspend accounts it only _warns_ of pending suspending via emails.
 
-
 ## Configuration
 
-The module is configurable at the system level to allow the subject line and body of the message to be customized. The message body supports parameter substitution like REDCap's data piping to allow messages to be customized with fields like `[username]`, `[user_firstname]`, `[user_lastname]`, `[login_link]`, `[days_until_suspension]` and `[suspension_date]`. The `[login_link]` is the REDCap login page.
+The module is configurable at the system level to allow the sending account, subject line, and body of the message to be customized. The message body supports parameter substitution like REDCap's data piping to allow messages to be customized with fields like `[username]`, `[user_firstname]`, `[user_lastname]`, `[login_link]`, `[days_until_suspension]` and `[suspension_date]`. The `[login_link]` is the REDCap login page.
+
+If you do not check **Use Custom Email Sender**, the module will use the email set at "Email Address of REDCap Administrator" under Control Center > General Configuration.
+
+If the email address is blank in either case, emails will not be sent and the cron job will return an error message.
 
 ### Email Configuration Example
 
@@ -87,10 +90,7 @@ To test WUPS, you need to turn on a few REDCap features it interacts with.  You 
     update redcap_config set value="1" where field_name = "suspend_users_inactive_send_email";
     update redcap_config set value="30" where field_name = "suspend_users_inactive_days";
 
-As this tool sends email, make sure the from address is configured correctly in your REDCap system. This tool uses "Email Address of REDCap Administrator" in the REDCap Control Center, General Configuration tab.  It's also a good idea to set a valid "universal 'FROM' email address" on that same page.  Those can be set quickly via SQL if you are so inclined. Here's an example of how a lazy developer at the University of Florida might do that:
-
-    update redcap_config set value="please-do-not-reply@ufl.edu" where field_name = "from_email";
-    update redcap_config set value="please-do-not-reply@ufl.edu" where field_name = "project_contact_email";
+As this tool sends email, make sure field that will be used for the **Sender Email** address is configured correctly in your module configuration.
 
 You'll also need some test users.  To revise the set of test users `alice`, `bob`, `dan`, and `carol` to receive messages based on the above configuration, change their `user_lastlogin` and `user_lastactivity` dates as follows:
 
