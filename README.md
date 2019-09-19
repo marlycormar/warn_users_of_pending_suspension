@@ -90,7 +90,7 @@ To test WUPS, you need to turn on a few REDCap features it interacts with.  You 
     update redcap_config set value="1" where field_name = "suspend_users_inactive_send_email";
     update redcap_config set value="30" where field_name = "suspend_users_inactive_days";
 
-As this tool sends email, make sure field that will be used for the **Sender Email** address is configured correctly in your module configuration.
+As this tool sends emails, make sure the field that will be used for the **Sender Email** address is configured correctly in your module configuration.
 
 You'll also need some test users.  To revise the set of test users `alice`, `bob`, `dan`, and `carol` to receive messages based on the above configuration, change their `user_lastlogin` and `user_lastactivity` dates as follows:
 
