@@ -61,6 +61,20 @@ class ExternalModule extends AbstractExternalModule {
 		// If feature is not enabled, then return
 		if ($suspend_users_inactive_type == '' || !is_numeric($suspend_users_inactive_days) || $suspend_users_inactive_days < 1) return;
 
+        // If sender email is not set, return
+		$sender = $this->getSystemSetting('use_wups_sender') ? $this->getSystemSetting('wups_sender') : $project_contact_email;
+        if (!$sender) {
+            $GLOBALS['redcapCronJobReturnMsg'] = "The sender email has not been configured properly. No emails will be sent";
+            return;
+        }
+
+        $email_info = [
+            'sender' => $sender,
+            'subject' => $this->getSystemSetting("wups_subject"),
+            'body' => $this->getSystemSetting("wups_body"),
+            'login_link' => APP_PATH_WEBROOT_FULL
+        ];
+
 		$days = $this->getSystemSetting('wups_notifications') ?: '1';
 		$days = array_map("intval", explode(",", $days));
 
@@ -95,13 +109,8 @@ class ExternalModule extends AbstractExternalModule {
 						'to' => $row['user_email']
 					];
 
-					switch (self::sendEmail($user_info)) {
-                        case TRUE:
+					if (self::sendEmail($user_info, $email_info)) {
                             $numNotificationsSent++;
-                            break;
-                        case 'configFail':
-                            $GLOBALS['redcapCronJobReturnMsg'] = "The sender email has not been configured properly. No emails will be sent";
-                            break 2; // break parent while loop
                     }
 				}
 			}
@@ -111,22 +120,18 @@ class ExternalModule extends AbstractExternalModule {
 			$GLOBALS['redcapCronJobReturnMsg'] = "$numNotificationsSent warnings of account suspension have been sent.";
 	}
 
-	function sendEmail($user_info) {
+	function sendEmail($user_info, $email_info) {
 		$to = $user_info['to'];
-		$sender = $this->getSystemSetting('use_wups_sender') ? $this->getSystemSetting('wups_sender') :$project_contact_email;
-		$subject = $this->getSystemSetting("wups_subject");
-		$body = $this->getSystemSetting("wups_body");
-		$login_link = APP_PATH_WEBROOT_FULL;
-
-        if (!$sender) {
-            return 'config_fail';
-        }
+        $sender = $email_info['sender'];
+		$subject = $email_info['subject'];
+		$body = $email_info['body'];
+		$login_link = $email_info['login_link'];
 
 		$piping_pairs = [
 			'[username]' => $user_info['username'],
 			'[user_firstname]' => $user_info['user_firstname'],
 			'[user_lastname]' => $user_info['user_lastname'],
-			'[login_link]' => $login_link,
+			'[login_link]' => $email_info['login_link'],
 			'[days_until_suspension]' => $user_info['days_until_suspension'],
 			'[suspension_date]' => $user_info['suspension_date']
 		];
