@@ -35,6 +35,25 @@
     ],
     "system-settings" : [
         {
+            "key": "use_wups_sender",
+            "name": "Use Custom Email Sender",
+            "required": false,
+            "type": "checkbox",
+            "repeatable": false
+        },
+        {
+            "key": "wups_sender",
+            "name": "Email Sender",
+            "required": false,
+            "type": "text",
+            "repeatable": false,
+            "branchingLogic": {
+                "field": "use_wups_sender",
+                "op": "=",
+                "value": true
+            }
+        },
+        {
             "key": "wups_subject",
             "name": "Email Subject",
             "required": false,
