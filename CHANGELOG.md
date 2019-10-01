@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to the REDCap Warn Users of Pending Suspension project will be documented in this file.
 
+
+## [2.0.2] - 2019-10-01
+### Changed
+- Ensure project_contact_email is from global scope (Kyle Chesney)
+- Correct wording. (Marly Cormar)
+
+### Added
+- Allow users to set a custom sender email, defaulting to the admin email (Kyle Chesney)
+
+
 ## [2.0.2] - 2019-08-26
 ### Added
 - Check that the user clicked the homepage. (Marly Cormar)
